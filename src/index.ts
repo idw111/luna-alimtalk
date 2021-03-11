@@ -18,7 +18,7 @@ type SendFunc = (app_user_ids: string | string[], template_id: string, message: 
 
 const api = (path: string): string => `https://jupiter.lunasoft.co.kr${path}`;
 
-const Luna = (userid: string, api_key: string): SendFunc => {
+const Luna = (userid: string, api_key: string): { sendAlimtalk: SendFunc } => {
 	const sendAlimtalk: SendFunc = async (app_user_ids, template_id, message, urls, params) => {
 		const getMessages = (app_user_ids: string[], urls?: ButtonUrl): Message[] =>
 			app_user_ids.map((app_user_id, i) => ({
@@ -46,7 +46,7 @@ const Luna = (userid: string, api_key: string): SendFunc => {
 			throw err;
 		}
 	};
-	return sendAlimtalk;
+	return { sendAlimtalk };
 };
 
 export default Luna;
