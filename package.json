@@ -1,0 +1,34 @@
+{
+	"name": "luna-alimtalk",
+	"version": "1.0.0",
+	"description": "",
+	"main": "./lib/index.js",
+	"files": [
+		"/lib"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/idw111/luna-alimtalk"
+	},
+	"scripts": {
+		"build": "tsc",
+		"clean": "rimraf lib",
+		"prepublish": "npm run clean && npm run build",
+		"test": "mocha \"test/**/*.test.js\""
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.21.1",
+		"lodash.template": "^4.5.0"
+	},
+	"devDependencies": {
+		"@types/lodash.template": "^4.5.0",
+		"dotenv": "^8.2.0",
+		"mocha": "^8.3.1",
+		"rimraf": "^3.0.2",
+		"should": "^13.2.3",
+		"typescript": "^4.2.3"
+	}
+}
