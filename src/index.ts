@@ -24,7 +24,7 @@ const Luna = (userid: string, api_key: string): { sendAlimtalk: SendFunc } => {
 			app_user_ids.map((app_user_id, i) => ({
 				no: `${i}`,
 				app_user_id,
-				msg_content: template(message, { interpolate: /\[([a-zA-Z0-9]+?)\]/g })(params),
+				msg_content: template(message, { interpolate: /\[([a-zA-Z0-9_-]+?)\]/g })(params),
 				use_sms: '0',
 				btn_url: urls ? [urls] : [],
 			}));
