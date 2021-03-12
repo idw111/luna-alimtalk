@@ -6,47 +6,72 @@ interface ButtonUrl {
 	url_mobile: string;
 }
 
-interface Message {
+interface MessageBasic {
 	no: string;
-	app_user_id: string;
 	msg_content: string;
 	use_sms: '0' | '1';
 	btn_url?: ButtonUrl[];
 }
 
-type SendFunc = (app_user_ids: string | string[], template_id: string, message: string, urls?: ButtonUrl, params?: { [key: string]: any }) => Promise<any>;
+interface UserId {
+	app_user_id: string;
+}
+
+interface PhoneNumber {
+	tel_num: string;
+}
+
+type MessageWithUserId = MessageBasic & UserId;
+
+type MessageWithPhone = MessageBasic & PhoneNumber;
+
+type Message = MessageWithUserId | MessageWithPhone;
+
+type SendFunc = (contacts: string | string[], template_id: string, message: string, params?: { [key: string]: any }, urls?: ButtonUrl | ButtonUrl[]) => Promise<any>;
+
+const interpolate = /\[([a-zA-Z0-9_-]+?)\]/g;
 
 const api = (path: string): string => `https://jupiter.lunasoft.co.kr${path}`;
 
-const Luna = (userid: string, api_key: string): { sendAlimtalk: SendFunc } => {
-	const sendAlimtalk: SendFunc = async (app_user_ids, template_id, message, urls, params) => {
-		const getMessages = (app_user_ids: string[], urls?: ButtonUrl): Message[] =>
-			app_user_ids.map((app_user_id, i) => ({
-				no: `${i}`,
-				app_user_id,
-				msg_content: template(message, { interpolate: /\[([a-zA-Z0-9_-]+?)\]/g })(params),
-				use_sms: '0',
-				btn_url: urls ? [urls] : [],
-			}));
+const toArray = <T>(something: T | T[]): T[] => (Array.isArray(something) ? something : [something]);
+
+const Luna = (userid: string, api_key: string): { sendWithAppUserId: SendFunc; sendWithPhone: SendFunc } => {
+	const sendMessages = async (template_id: string, messages: Message[]) => {
 		try {
-			const { data } = await axios.post(
-				api('/api/AlimTalk/message/send'),
-				{
-					userid,
-					api_key,
-					template_id,
-					messages: getMessages(Array.isArray(app_user_ids) ? app_user_ids : [app_user_ids], urls),
-				},
-				{
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
+			const { data } = await axios.post(api('/api/AlimTalk/message/send'), { userid, api_key, template_id, messages }, { headers: { 'Content-Type': 'application/json' } });
 			return data;
 		} catch (err) {
 			throw err;
 		}
 	};
-	return { sendAlimtalk };
+	const sendWithAppUserId: SendFunc = async (contacts, template_id, message, params, urls) => {
+		const getMessages = (contacts: string[], btn_url?: ButtonUrl[]): Message[] =>
+			contacts.map((app_user_id, i) => ({
+				no: `${i}`,
+				app_user_id,
+				msg_content: template(message, { interpolate })(params),
+				use_sms: '0',
+				btn_url,
+			}));
+		if (!urls) console.warn('템플릿에는 버튼링크가 있는데 전송 시 버튼링크가 입력되지 않은 경우 요청은 성공하지만 알림톡은 전송되지 않습니다.');
+		await sendMessages(template_id, getMessages(toArray<string>(contacts), urls ? toArray<ButtonUrl>(urls) : urls));
+	};
+	const sendWithPhone: SendFunc = async (contacts, template_id, message, params, urls) => {
+		const getMessages = (contacts: string[], btn_url?: ButtonUrl[]): Message[] =>
+			contacts.map((tel_num, i) => ({
+				no: `${i}`,
+				tel_num,
+				msg_content: template(message, { interpolate })(params),
+				use_sms: '0',
+				btn_url,
+			}));
+		if (!urls) console.warn('템플릿에는 버튼링크가 있는데 전송 시 버튼링크가 입력되지 않은 경우 요청은 성공하지만 알림톡은 전송되지 않습니다.');
+		await sendMessages(template_id, getMessages(toArray<string>(contacts), urls ? toArray<ButtonUrl>(urls) : urls));
+	};
+	return {
+		sendWithAppUserId,
+		sendWithPhone,
+	};
 };
 
 export = Luna;
