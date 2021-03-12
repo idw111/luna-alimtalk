@@ -49,4 +49,4 @@ const Luna = (userid: string, api_key: string): { sendAlimtalk: SendFunc } => {
 	return { sendAlimtalk };
 };
 
-export default Luna;
+export = Luna;

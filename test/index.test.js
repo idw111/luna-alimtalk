@@ -1,4 +1,4 @@
-const Luna = require('../lib').default;
+const Luna = require('../lib');
 
 describe('alimtalk', function () {
 	it('should not return error on request', async function () {
