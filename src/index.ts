@@ -29,7 +29,7 @@ type Message = MessageWithUserId | MessageWithPhone;
 
 type SendFunc = (contacts: string | string[], template_id: string, message: string, params?: { [key: string]: any }, urls?: ButtonUrl | ButtonUrl[]) => Promise<any>;
 
-const interpolate = /\[([a-zA-Z0-9_-]+?)\]/g;
+const interpolate = /\[([^\[\]\s]+?)\]/g;
 
 const api = (path: string): string => `https://jupiter.lunasoft.co.kr${path}`;
 

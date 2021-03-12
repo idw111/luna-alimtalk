@@ -1,7 +1,7 @@
 {
 	"name": "luna-alimtalk",
-	"version": "1.2.0",
-	"description": "",
+	"version": "1.2.1",
+	"description": "lunasoft alimtalk",
 	"main": "./lib/index.js",
 	"files": [
 		"/lib"
@@ -16,7 +16,11 @@
 		"prepublish": "npm run clean && npm run build",
 		"test": "mocha \"test/**/*.test.js\""
 	},
-	"keywords": [],
+	"keywords": [
+		"루나소프트",
+		"카카오",
+		"알림톡"
+	],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
