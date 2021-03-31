@@ -1,6 +1,6 @@
 {
 	"name": "luna-alimtalk",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"description": "lunasoft alimtalk",
 	"main": "./lib/index.js",
 	"files": [
