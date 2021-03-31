@@ -35,10 +35,30 @@ const api = (path: string): string => `https://jupiter.lunasoft.co.kr${path}`;
 
 const toArray = <T>(something: T | T[]): T[] => (Array.isArray(something) ? something : [something]);
 
+const getDefalutParams = (message: string): { [key: string]: any } => {
+	let params: { [key: string]: any } = {};
+	let result = null;
+	while ((result = interpolate.exec(message)) !== null) {
+		params[result[1]] = result[1];
+	}
+	return params;
+};
+
 const Luna = (userid: string, api_key: string): { sendWithAppUserId: SendFunc; sendWithPhone: SendFunc } => {
 	const sendMessages = async (template_id: string, messages: Message[]) => {
 		try {
-			const { data } = await axios.post(api('/api/AlimTalk/message/send'), { userid, api_key, template_id, messages }, { headers: { 'Content-Type': 'application/json' } });
+			const { data } = await axios.post(
+				api('/api/AlimTalk/message/send'),
+				{
+					userid,
+					api_key,
+					template_id,
+					messages,
+				},
+				{
+					headers: { 'Content-Type': 'application/json; charset=utf-8' },
+				}
+			);
 			return data;
 		} catch (err) {
 			throw err;
@@ -46,25 +66,31 @@ const Luna = (userid: string, api_key: string): { sendWithAppUserId: SendFunc; s
 	};
 	const sendWithAppUserId: SendFunc = async (contacts, template_id, message, params, urls) => {
 		const getMessages = (contacts: string[], btn_url?: ButtonUrl[]): Message[] =>
-			contacts.map((app_user_id, i) => ({
-				no: `${i}`,
-				app_user_id,
-				msg_content: template(message, { interpolate })(params),
-				use_sms: '0',
-				btn_url,
-			}));
+			contacts.map((app_user_id, i) => {
+				const defaultParams = getDefalutParams(message);
+				return {
+					no: `${i}`,
+					app_user_id,
+					msg_content: template(message, { interpolate })({ ...defaultParams, ...params }),
+					use_sms: '0',
+					btn_url,
+				};
+			});
 		if (!urls) console.warn('템플릿에는 버튼링크가 있는데 전송 시 버튼링크가 입력되지 않은 경우 요청은 성공하지만 알림톡은 전송되지 않습니다.');
 		await sendMessages(template_id, getMessages(toArray<string>(contacts), urls ? toArray<ButtonUrl>(urls) : urls));
 	};
 	const sendWithPhone: SendFunc = async (contacts, template_id, message, params, urls) => {
 		const getMessages = (contacts: string[], btn_url?: ButtonUrl[]): Message[] =>
-			contacts.map((tel_num, i) => ({
-				no: `${i}`,
-				tel_num,
-				msg_content: template(message, { interpolate })(params),
-				use_sms: '0',
-				btn_url,
-			}));
+			contacts.map((tel_num, i) => {
+				const defaultParams = getDefalutParams(message);
+				return {
+					no: `${i}`,
+					tel_num,
+					msg_content: template(message, { interpolate })({ ...defaultParams, ...params }),
+					use_sms: '0',
+					btn_url,
+				};
+			});
 		if (!urls) console.warn('템플릿에는 버튼링크가 있는데 전송 시 버튼링크가 입력되지 않은 경우 요청은 성공하지만 알림톡은 전송되지 않습니다.');
 		await sendMessages(template_id, getMessages(toArray<string>(contacts), urls ? toArray<ButtonUrl>(urls) : urls));
 	};
