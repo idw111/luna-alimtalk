@@ -29,7 +29,7 @@ describe('getMessageWithParams', function () {
 });
 
 describe('alimtalk', function () {
-	it('should not return error on request', async function () {
+	it.skip('should not return error on request', async function () {
 		await sendWithAppUserId(
 			process.env.TEST_APP_USER_ID,
 			process.env.TEST_TEMPLATE_ID,

@@ -32,12 +32,17 @@ const api = (path: string): string => `https://jupiter.lunasoft.co.kr${path}`;
 
 const toArray = <T>(something: T | T[]): T[] => (Array.isArray(something) ? something : [something]);
 
-const getMessageWithParams = (message: string, params: { [key: string]: any } | undefined): string => {
+const getMessageWithParams = (message: string, params: { [key: string]: any } | undefined, options: { opening: string; closing: string } = { opening: '[', closing: ']' }): string => {
 	if (!params) return message;
 	return Object.keys(params).reduce((messageWithParams, key) => {
-		const pattern = new RegExp(`\\[${key}\\]`, 'g');
+		let pos = null;
+		let _message = messageWithParams;
+		const pattern = `${options.opening}${key}${options.closing}`;
 		const text = params[key];
-		return messageWithParams.replace(pattern, text);
+		while ((pos = _message.indexOf(pattern)) !== -1) {
+			_message = _message.substr(0, pos) + text + _message.substr(pos + pattern.length);
+		}
+		return _message;
 	}, message);
 };
 
